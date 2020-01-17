@@ -1,23 +1,24 @@
 const fs = require('fs');
 
 function operate() {
-  const path = './db/users.json';
+  const user_path = './db/users.json';
+  const session_path = './db/session.json';
   let DataBaseString;
   let DataBaseArray;
   this.setUser = function(user) {
-    DataBaseString = fs.readFileSync(path);
+    DataBaseString = fs.readFileSync(user_path);
     DataBaseArray = JSON.parse(DataBaseString);
     DataBaseArray.push(user);
     DataBaseString = JSON.stringify(DataBaseArray);
-    fs.writeFileSync(path, DataBaseString);
+    fs.writeFileSync(user_path, DataBaseString);
   };
   this.getUsers = function() {
-    DataBaseString = fs.readFileSync(path);
+    DataBaseString = fs.readFileSync(user_path);
     DataBaseArray = JSON.parse(DataBaseString);
     return DataBaseArray;
   };
   this.checkUser = function(user) {
-    DataBaseString = fs.readFileSync(path);
+    DataBaseString = fs.readFileSync(user_path);
     DataBaseArray = JSON.parse(DataBaseString);
     const Data = DataBaseArray.find(item => {
       return item.name === user.name && item.password === user.password;
@@ -26,7 +27,7 @@ function operate() {
   };
   this.searchUser = function(id) {
     const user_id = id - 0;
-    DataBaseString = fs.readFileSync(path);
+    DataBaseString = fs.readFileSync(user_path);
     DataBaseArray = JSON.parse(DataBaseString);
     const Data = DataBaseArray.find(item => {
       return item.id === user_id;
@@ -35,7 +36,7 @@ function operate() {
   };
   this.getIndex = function(user) {
     let index;
-    DataBaseString = fs.readFileSync(path);
+    DataBaseString = fs.readFileSync(user_path);
     DataBaseArray = JSON.parse(DataBaseString);
     if (DataBaseArray.length !== 0) {
       index = DataBaseArray[DataBaseArray.length - 1].id;
@@ -43,6 +44,24 @@ function operate() {
       index = 0;
     }
     return index;
+  };
+  this.setSession = function(user_id) {
+    DataBaseString = fs.readFileSync(session_path);
+    DataBaseObj = JSON.parse(DataBaseString);
+    const number = Math.random();
+    DataBaseObj[number] = { user_id: user_id };
+    DataBaseString = JSON.stringify(DataBaseObj);
+    fs.writeFileSync(session_path, DataBaseString);
+    return number;
+  };
+  this.searchSession = function(session_id) {
+    let Data = {};
+    DataBaseString = fs.readFileSync(session_path);
+    DataBaseObj = JSON.parse(DataBaseString);
+    if (DataBaseObj[session_id]) {
+      Data = DataBaseObj[session_id];
+    }
+    return Data;
   };
 }
 module.exports = operate;

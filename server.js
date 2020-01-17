@@ -37,15 +37,22 @@ var server = http.createServer(function(request, response) {
     }
     if (cookie) {
       const cookieList = cookie.split(';');
-      const user_id = cookieList.filter(item => {
-        return item.search('user_id') >= 0;
+      const session_id = cookieList.filter(item => {
+        return item.search('session_id') >= 0;
       });
-      const id = user_id[0].trim().replace('user_id=', '');
-      const result = operate.searchUser(id);
-      const username = result.name;
-      content = content
-        .replace('{{username}}', username)
-        .replace('{{loginStatus}}', '欢迎登录');
+      try {
+        const session_number = session_id[0].trim().replace('session_id=', '');
+        const session_obj = operate.searchSession(session_number);
+        const result = operate.searchUser(session_obj.user_id);
+        const username = result.name;
+        content = content
+          .replace('{{username}}', username)
+          .replace('{{loginStatus}}', '欢迎登录');
+      } catch (error) {
+        content = content
+          .replace('{{username}}', '错误')
+          .replace('{{loginStatus}}', '请重新登录');
+      }
     } else {
       content = content
         .replace('{{username}}', '未登录')
@@ -68,11 +75,11 @@ var server = http.createServer(function(request, response) {
         password: User.password
       };
       const result = operate.checkUser(user);
-      console.log(result);
       //响应部分
       if (result) {
+        const number = operate.setSession(result.id);
         response.statusCode = 200;
-        response.setHeader('Set-Cookie', `user_id=${result.id};HttpOnly`);
+        response.setHeader('Set-Cookie', `session_id=${number};HttpOnly`);
       } else {
         response.statusCode = 400;
         response.setHeader('Content-Type', 'text/json;charset=UTF-8');
