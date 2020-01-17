@@ -38,7 +38,7 @@ var server = http.createServer(function(request, response) {
     if (cookie) {
       const cookieList = cookie.split(';');
       const user_id = cookieList.filter(item => {
-        return item.search('user_id') > 0;
+        return item.search('user_id') >= 0;
       });
       const id = user_id[0].trim().replace('user_id=', '');
       const result = operate.searchUser(id);
@@ -72,7 +72,7 @@ var server = http.createServer(function(request, response) {
       //响应部分
       if (result) {
         response.statusCode = 200;
-        response.setHeader('Set-Cookie', `user_id=${result.id}`);
+        response.setHeader('Set-Cookie', `user_id=${result.id};HttpOnly`);
       } else {
         response.statusCode = 400;
         response.setHeader('Content-Type', 'text/json;charset=UTF-8');
