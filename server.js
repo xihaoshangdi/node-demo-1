@@ -23,8 +23,36 @@ var server = http.createServer(function(request, response) {
   /******** 从这里开始看，上面不要看 ************/
 
   console.log('发请求过来啦！路径（带查询参数）为：' + pathWithQuery);
-  if (path === './home') {
-    //
+  if (path === '/home.html') {
+    const cookie = request.headers['cookie'];
+    //响应部分
+    response.setHeader('Content-Type', 'text/html;charset=utf-8');
+    let content;
+    try {
+      content = fs.readFileSync(`./public/home.html`).toString();
+      response.statusCode = 200;
+    } catch (error) {
+      content = 'error';
+      response.statusCode = 404;
+    }
+    if (cookie) {
+      const cookieList = cookie.split(';');
+      const user_id = cookieList.filter(item => {
+        return item.search('user_id') > 0;
+      });
+      const id = user_id[0].trim().replace('user_id=', '');
+      const result = operate.searchUser(id);
+      const username = result.name;
+      content = content
+        .replace('{{username}}', username)
+        .replace('{{loginStatus}}', '欢迎登录');
+    } else {
+      content = content
+        .replace('{{username}}', '未登录')
+        .replace('{{loginStatus}}', '');
+    }
+    response.write(content);
+    response.end();
     //
   } else if (path === '/SignIn' && method === 'POST') {
     //请求部分
@@ -40,12 +68,14 @@ var server = http.createServer(function(request, response) {
         password: User.password
       };
       const result = operate.checkUser(user);
+      console.log(result);
       //响应部分
-      response.setHeader('Content-Type', 'text/json;charset=UTF-8');
       if (result) {
         response.statusCode = 200;
+        response.setHeader('Set-Cookie', `user_id=${result.id}`);
       } else {
         response.statusCode = 400;
+        response.setHeader('Content-Type', 'text/json;charset=UTF-8');
         response.write('errorCode:4001');
       }
       response.end();

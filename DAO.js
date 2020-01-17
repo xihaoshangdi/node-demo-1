@@ -24,6 +24,15 @@ function operate() {
     });
     return Data;
   };
+  this.searchUser = function(id) {
+    const user_id = id - 0;
+    DataBaseString = fs.readFileSync(path);
+    DataBaseArray = JSON.parse(DataBaseString);
+    const Data = DataBaseArray.find(item => {
+      return item.id === user_id;
+    });
+    return Data;
+  };
   this.getIndex = function(user) {
     let index;
     DataBaseString = fs.readFileSync(path);
